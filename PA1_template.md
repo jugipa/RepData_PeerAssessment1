@@ -97,16 +97,44 @@
 
 2. Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
 
+    I used th mice() function takes care of the imputing process.
+    m=5 refers to the number of imputed datasets. Five is the default value.
+    method='pmm' refers to the imputation method. In this case we are using predictive mean matching as imputation method. 
+
 ```r
-    # I will use the average of steps in dataset for missing values.
-    missing_value <- mean(activity$steps, na.rm = TRUE)
+    library(mice)
+    tempData <- activity[, c(1,3)]
+    imputingData <- mice(tempData, method="pmm", m = 5, maxit = 3, seed = 500, printFlag = FALSE)
+    summary(imputingData)
+```
+
+```
+## Multiply imputed data set
+## Call:
+## mice(data = tempData, m = 5, method = "pmm", maxit = 3, printFlag = FALSE, 
+##     seed = 500)
+## Number of multiple imputations:  5
+## Missing cells per column:
+##    steps interval 
+##     2304        0 
+## Imputation methods:
+##    steps interval 
+##    "pmm"    "pmm" 
+## VisitSequence:
+## steps 
+##     1 
+## PredictorMatrix:
+##          steps interval
+## steps        0        1
+## interval     0        0
+## Random generator seed value:  500
 ```
 
 3. Create a new dataset that is equal to the original dataset but with the missing data filled in.
 
 ```r
     new_activity <- activity
-    new_activity[!complete.cases(new_activity),]$steps <- missing_value
+    new_activity$steps <- complete(imputingData,1)$steps
 ```
 
 4. Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
@@ -124,7 +152,7 @@
 ```
 
 ```
-## [1] 10766.19
+## [1] 10911.31
 ```
 
 ```r
@@ -132,9 +160,9 @@
 ```
 
 ```
-## [1] 10766.19
+## [1] 11015
 ```
-As we can see, gap between the mean and median is reduced.
+As you can see, distribution changed especially in 0 frequency.
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
@@ -163,7 +191,7 @@ As we can see, gap between the mean and median is reduced.
 
 ```
 ## 'data.frame':	17568 obs. of  4 variables:
-##  $ steps   : num  37.4 37.4 37.4 37.4 37.4 ...
+##  $ steps   : int  0 0 0 5 0 0 0 0 0 0 ...
 ##  $ date    : Date, format: "2012-10-01" "2012-10-01" ...
 ##  $ interval: int  0 5 10 15 20 25 30 35 40 45 ...
 ##  $ wday    : Factor w/ 2 levels "weekday","weekend": 1 1 1 1 1 1 1 1 1 1 ...
